@@ -14,6 +14,12 @@ builder.Services.AddChord(config =>
         flow.FromYamlFile("flow/order-flow.yaml");
     });
 
+    config.Store(store =>
+    {
+        store.InMemory();
+        // Or: store.PostgreSql(options => { options.ConnectionString = "..."; options.Schema = "orchestration"; });
+    });
+
     config.Messaging(m =>
     {
         m.RabbitMq(options =>
@@ -33,6 +39,7 @@ Key points:
 - `FromYamlFile` accepts relative or absolute paths. The file must exist when the host starts; otherwise a `FileNotFoundException` is thrown.
 - Only `.yaml` and `.yml` extensions are allowed. Any other extension results in a `ChordConfigurationException`.
 - YAML parsing/validation happens during startup, meaning misconfigurations fail fast and prevent the application from starting in an unsafe state.
+- Exactly one store provider must be registered via `config.Store(...)` (either InMemory or PostgreSql). Chord validates this at startup.
 
 ## Supported YAML schema
 

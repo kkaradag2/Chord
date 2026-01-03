@@ -3,6 +3,7 @@ using System.IO;
 using Chord.Core;
 using Chord.Core.Exceptions;
 using Chord.Core.Flows;
+using Chord.Store.InMemory.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Chord.Test.Registrations;
@@ -28,6 +29,7 @@ public class FlowConfigurationTests
             {
                 flow.FromYamlFile(Sample("order-flow.yaml"));
             });
+            config.Store(store => store.InMemory());
         });
 
         using var provider = services.BuildServiceProvider();
@@ -53,7 +55,10 @@ public class FlowConfigurationTests
 
         Assert.Throws<FileNotFoundException>(() =>
             services.AddChord(config =>
-                config.Flow(flow => flow.FromYamlFile(Sample("missing-flow.yaml")))));
+            {
+                config.Flow(flow => flow.FromYamlFile(Sample("missing-flow.yaml")));
+                config.Store(store => store.InMemory());
+            }));
     }
 
     /// <summary>
@@ -66,7 +71,10 @@ public class FlowConfigurationTests
 
         var exception = Assert.Throws<ChordConfigurationException>(() =>
             services.AddChord(config =>
-                config.Flow(flow => flow.FromYamlFile(Sample("not-yaml.txt")))));
+            {
+                config.Flow(flow => flow.FromYamlFile(Sample("not-yaml.txt")));
+                config.Store(store => store.InMemory());
+            }));
 
         Assert.Contains(".yaml", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
@@ -81,7 +89,10 @@ public class FlowConfigurationTests
 
         var exception = Assert.Throws<ChordConfigurationException>(() =>
             services.AddChord(config =>
-                config.Flow(flow => flow.FromYamlFile(Sample("malformed.yaml")))));
+            {
+                config.Flow(flow => flow.FromYamlFile(Sample("malformed.yaml")));
+                config.Store(store => store.InMemory());
+            }));
 
         Assert.Contains("invalid YAML", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
@@ -96,7 +107,10 @@ public class FlowConfigurationTests
 
         var exception = Assert.Throws<ChordConfigurationException>(() =>
             services.AddChord(config =>
-                config.Flow(flow => flow.FromYamlFile(Sample("invalid-metadata.yaml")))));
+            {
+                config.Flow(flow => flow.FromYamlFile(Sample("invalid-metadata.yaml")));
+                config.Store(store => store.InMemory());
+            }));
 
         Assert.Contains("Workflow name", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
@@ -111,7 +125,10 @@ public class FlowConfigurationTests
 
         var exception = Assert.Throws<ChordConfigurationException>(() =>
             services.AddChord(config =>
-                config.Flow(flow => flow.FromYamlFile(Sample("invalid-step-count.yaml")))));
+            {
+                config.Flow(flow => flow.FromYamlFile(Sample("invalid-step-count.yaml")));
+                config.Store(store => store.InMemory());
+            }));
 
         Assert.Contains("at least two steps", exception.Message, StringComparison.OrdinalIgnoreCase);
     }

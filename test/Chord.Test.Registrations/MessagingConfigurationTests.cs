@@ -5,6 +5,7 @@ using Chord.Core;
 using Chord.Core.Exceptions;
 using Chord.Messaging.RabitMQ.Configuration;
 using Chord.Messaging.RabitMQ.Messaging;
+using Chord.Store.InMemory.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Chord.Test.Registrations;
@@ -27,6 +28,7 @@ public class MessagingConfigurationTests
         services.AddChord(config =>
         {
             config.Flow(flow => flow.FromYamlFile(Sample("order-flow.yaml")));
+            config.Store(store => store.InMemory());
             config.Messaging(m =>
             {
                 m.RabbitMq(options =>
@@ -61,6 +63,7 @@ public class MessagingConfigurationTests
             services.AddChord(config =>
             {
                 config.Flow(flow => flow.FromYamlFile(Sample("order-flow.yaml")));
+                config.Store(store => store.InMemory());
                 config.Messaging(m => m.RabbitMq(options =>
                 {
                     options.HostName = "localhost";
@@ -86,6 +89,7 @@ public class MessagingConfigurationTests
             services.AddChord(config =>
             {
                 config.Flow(flow => flow.FromYamlFile(Sample("order-flow.yaml")));
+                config.Store(store => store.InMemory());
                 config.Messaging(m =>
                 {
                     m.RabbitMq(options =>
@@ -117,6 +121,7 @@ public class MessagingConfigurationTests
             services.AddChord(config =>
             {
                 config.Flow(flow => flow.FromYamlFile(Sample("order-flow.yaml")));
+                config.Store(store => store.InMemory());
                 config.Messaging(m =>
                 {
                     m.RabbitMq(options =>

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Chord.Core;
 using Chord.Messaging.RabitMQ.Configuration;
 using Chord.Messaging.RabitMQ.Messaging;
+using Chord.Store.InMemory.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -28,6 +29,7 @@ public sealed class EcommerceFlowMessagingTests
         builder.Services.AddChord(config =>
         {
             config.Flow(flow => flow.FromYamlFile(flowPath));
+            config.Store(store => store.InMemory());
             config.Messaging(m =>
             {
                 m.RabbitMq(options =>

@@ -12,6 +12,7 @@ public sealed class ChordConfigurationBuilder
 {
     private readonly IServiceCollection _services;
     private ChordFlowDefinition? _flowDefinition;
+    private StoreBuilder? _storeBuilder;
 
     /// <summary>
     /// Initializes the builder with the service collection so extensions can register components.
@@ -44,10 +45,36 @@ public sealed class ChordConfigurationBuilder
     }
 
     /// <summary>
+    /// Configures the persistence provider Chord uses to track workflow progress.
+    /// </summary>
+    /// <param name="configure">Action that selects the store provider (e.g. InMemory, PostgreSql).</param>
+    public void Store(Action<StoreBuilder> configure)
+    {
+        if (configure is null)
+        {
+            throw new ArgumentNullException(nameof(configure));
+        }
+
+        _storeBuilder ??= new StoreBuilder(_services);
+        configure(_storeBuilder);
+    }
+
+    /// <summary>
     /// Gets the configured flow definition or throws if none has been provided.
     /// </summary>
     internal ChordFlowDefinition Build()
     {
-        return _flowDefinition ?? throw new ChordConfigurationException("Chord flow must be configured by calling Flow().");
+        if (_flowDefinition is null)
+        {
+            throw new ChordConfigurationException("Chord flow must be configured by calling Flow().");
+        }
+
+        if (_storeBuilder is null)
+        {
+            throw new ChordConfigurationException("Chord store must be configured by calling Store().");
+        }
+
+        _storeBuilder.Validate();
+        return _flowDefinition;
     }
 }

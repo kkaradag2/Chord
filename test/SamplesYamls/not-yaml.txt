@@ -1,0 +1,3 @@
+﻿workflow:
+  name: WrongExtension
+  version: 1.0

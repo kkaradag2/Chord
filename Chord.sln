@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chord.Store.PostgreSql", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chord.Messaging.RabitMQ", "src\Chord.Messaging.RabitMQ\Chord.Messaging.RabitMQ.csproj", "{BE783409-A30D-41A0-83B8-AAFF954106AF}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{0C88DD14-F956-CE84-757C-A364CCF449FC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chord.Test.Registrations", "test\Chord.Test.Registrations\Chord.Test.Registrations.csproj", "{7BDFCF98-A80E-406B-87FA-A9C8BEC1B4C0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +75,18 @@ Global
 		{BE783409-A30D-41A0-83B8-AAFF954106AF}.Release|x64.Build.0 = Release|Any CPU
 		{BE783409-A30D-41A0-83B8-AAFF954106AF}.Release|x86.ActiveCfg = Release|Any CPU
 		{BE783409-A30D-41A0-83B8-AAFF954106AF}.Release|x86.Build.0 = Release|Any CPU
+		{7BDFCF98-A80E-406B-87FA-A9C8BEC1B4C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BDFCF98-A80E-406B-87FA-A9C8BEC1B4C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BDFCF98-A80E-406B-87FA-A9C8BEC1B4C0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7BDFCF98-A80E-406B-87FA-A9C8BEC1B4C0}.Debug|x64.Build.0 = Debug|Any CPU
+		{7BDFCF98-A80E-406B-87FA-A9C8BEC1B4C0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7BDFCF98-A80E-406B-87FA-A9C8BEC1B4C0}.Debug|x86.Build.0 = Debug|Any CPU
+		{7BDFCF98-A80E-406B-87FA-A9C8BEC1B4C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BDFCF98-A80E-406B-87FA-A9C8BEC1B4C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BDFCF98-A80E-406B-87FA-A9C8BEC1B4C0}.Release|x64.ActiveCfg = Release|Any CPU
+		{7BDFCF98-A80E-406B-87FA-A9C8BEC1B4C0}.Release|x64.Build.0 = Release|Any CPU
+		{7BDFCF98-A80E-406B-87FA-A9C8BEC1B4C0}.Release|x86.ActiveCfg = Release|Any CPU
+		{7BDFCF98-A80E-406B-87FA-A9C8BEC1B4C0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -80,5 +96,6 @@ Global
 		{5760595F-6321-4361-AA6F-7FFB61DA6263} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{5CD59197-E546-4826-8B33-6E4FDFC97EB9} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{BE783409-A30D-41A0-83B8-AAFF954106AF} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{7BDFCF98-A80E-406B-87FA-A9C8BEC1B4C0} = {0C88DD14-F956-CE84-757C-A364CCF449FC}
 	EndGlobalSection
 EndGlobal

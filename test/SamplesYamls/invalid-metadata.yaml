@@ -1,0 +1,6 @@
+﻿workflow:
+  version: 1.0
+
+steps:
+  - id: order
+    service: OrderService

@@ -1,0 +1,47 @@
+﻿workflow:
+  name: OrderFlow
+  version: 1.0
+
+steps:
+  - id: order
+    service: OrderService
+    command:
+      event: OrderRequested
+      queue: order.command
+    completion:
+      event: OrderCompleted
+      timeout: 5s
+
+  - id: payment
+    service: PaymentService
+    command:
+      event: PaymentRequested
+      queue: payment.command
+    completion:
+      event: PaymentCompleted
+      timeout: 10s
+    onFailure:
+      rollback:
+        - step: order
+          command:
+            event: OrderRollbackRequested
+            queue: order.command
+
+  - id: shipping
+    service: ShippingService
+    command:
+      event: ShippingRequested
+      queue: shipping.command
+    completion:
+      event: ShippingCompleted
+      timeout: 10s
+    onFailure:
+      rollback:
+        - step: payment
+          command:
+            event: PaymentRollbackRequested
+            queue: payment.command
+        - step: order
+          command:
+            event: OrderRollbackRequested
+            queue: order.command

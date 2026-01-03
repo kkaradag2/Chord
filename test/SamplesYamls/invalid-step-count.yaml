@@ -1,0 +1,13 @@
+﻿workflow:
+  name: InvalidFlow
+  version: 1.0
+
+steps:
+  - id: order
+    service: OrderService
+    command:
+      event: OrderRequested
+      queue: order.command
+    completion:
+      event: OrderCompleted
+      timeout: 5s

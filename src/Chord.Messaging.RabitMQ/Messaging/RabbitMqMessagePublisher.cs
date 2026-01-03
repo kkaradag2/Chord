@@ -37,7 +37,6 @@ internal sealed class RabbitMqMessagePublisher : IRabbitMqMessagePublisher
 
         if (!string.IsNullOrWhiteSpace(correlationId))
         {
-            properties.CorrelationId = correlationId;
             properties.Headers ??= new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
             properties.Headers["x-correlation-id"] = correlationId;
         }

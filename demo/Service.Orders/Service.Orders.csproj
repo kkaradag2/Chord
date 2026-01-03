@@ -8,6 +8,19 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.10" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\\..\\src\\Chord.Core\\Chord.Core.csproj" />
+    <ProjectReference Include="..\\..\\src\\Chord.Messaging.RabitMQ\\Chord.Messaging.RabitMQ.csproj" />
+    <ProjectReference Include="..\\..\\src\\Chord.Store.InMemory\\Chord.Store.InMemory.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="flows\\order-flow.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

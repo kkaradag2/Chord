@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Chord.Core.Exceptions;
 using Chord.Core.Flows;
+using Chord.Core.Stores;
 
 namespace Chord.Messaging.RabitMQ.Messaging;
 
@@ -14,11 +15,13 @@ internal sealed class ChordFlowMessenger : IChordFlowMessenger
 {
     private readonly IChordFlowDefinitionProvider _flowProvider;
     private readonly IChordMessagePublisher _publisher;
+    private readonly IChordStore _store;
 
-    public ChordFlowMessenger(IChordFlowDefinitionProvider flowProvider, IChordMessagePublisher publisher)
+    public ChordFlowMessenger(IChordFlowDefinitionProvider flowProvider, IChordMessagePublisher publisher, IChordStore store)
     {
         _flowProvider = flowProvider ?? throw new ArgumentNullException(nameof(flowProvider));
         _publisher = publisher ?? throw new ArgumentNullException(nameof(publisher));
+        _store = store ?? throw new ArgumentNullException(nameof(store));
     }
 
     public ValueTask StartAsync(ReadOnlyMemory<byte> payload, CancellationToken cancellationToken = default)
@@ -31,7 +34,19 @@ internal sealed class ChordFlowMessenger : IChordFlowMessenger
 
         var nextStep = flow.Steps[1];
         var correlationId = CreateCorrelationId();
-        return _publisher.PublishAsync(nextStep.Command.Queue, payload, correlationId, cancellationToken);
+        var payloadText = ConvertPayloadToText(payload);
+
+        var record = new FlowDispatchRecord(
+            correlationId,
+            nextStep.Id,
+            nextStep.Command.Queue,
+            FlowDispatchStatus.InProgress,
+            DateTimeOffset.UtcNow,
+            null,
+            TimeSpan.Zero,
+            payloadText);
+
+        return DispatchAsync(nextStep.Command.Queue, payload, correlationId, record, cancellationToken);
     }
 
     public ValueTask StartAsync(string payload, CancellationToken cancellationToken = default)
@@ -40,5 +55,28 @@ internal sealed class ChordFlowMessenger : IChordFlowMessenger
         return StartAsync(data, cancellationToken);
     }
 
+    private async ValueTask DispatchAsync(string queue, ReadOnlyMemory<byte> payload, string correlationId, FlowDispatchRecord record, CancellationToken cancellationToken)
+    {
+        await _store.RecordDispatchAsync(record, cancellationToken).ConfigureAwait(false);
+        await _publisher.PublishAsync(queue, payload, correlationId, cancellationToken).ConfigureAwait(false);
+    }
+
     private static string CreateCorrelationId() => Guid.NewGuid().ToString("N");
+
+    private static string ConvertPayloadToText(ReadOnlyMemory<byte> payload)
+    {
+        if (payload.IsEmpty)
+        {
+            return string.Empty;
+        }
+
+        try
+        {
+            return Encoding.UTF8.GetString(payload.Span);
+        }
+        catch
+        {
+            return Convert.ToBase64String(payload.Span);
+        }
+    }
 }

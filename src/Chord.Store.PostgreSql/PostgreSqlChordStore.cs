@@ -1,3 +1,5 @@
+using System.Threading;
+using System.Threading.Tasks;
 using Chord.Core.Stores;
 
 namespace Chord.Store.PostgreSql;
@@ -12,5 +14,11 @@ internal sealed class PostgreSqlChordStore : IChordStore
     public PostgreSqlChordStore(PostgreSqlStoreOptions options)
     {
         Options = options;
+    }
+
+    public ValueTask RecordDispatchAsync(FlowDispatchRecord record, CancellationToken cancellationToken = default)
+    {
+        // Implementation placeholder; actual persistence will be added in future work.
+        return ValueTask.CompletedTask;
     }
 }

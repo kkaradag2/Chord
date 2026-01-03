@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Chord.Core.Exceptions;
 using Chord.Core.Flows;
+using Chord.Core.Stores;
 using Chord.Messaging.RabitMQ.Messaging;
 
 namespace Chord.Test.Registrations;
@@ -17,13 +18,20 @@ public class ChordFlowMessengerTests
     {
         var flow = BuildFlow("host", "payment.command");
         var publisher = new FakePublisher();
-        var messenger = new ChordFlowMessenger(new FakeFlowProvider(flow), publisher);
+        var store = new FakeStore();
+        var messenger = new ChordFlowMessenger(new FakeFlowProvider(flow), publisher, store);
 
         await messenger.StartAsync("payload");
 
         Assert.Equal("payment.command", publisher.QueueName);
         Assert.Equal("payload", Encoding.UTF8.GetString(publisher.Payload.ToArray()));
         Assert.False(string.IsNullOrWhiteSpace(publisher.CorrelationId));
+        Assert.Single(store.Records);
+        var record = store.Records[0];
+        Assert.Equal("payment", record.StepId);
+        Assert.Equal("payment.command", record.QueueName);
+        Assert.Equal(FlowDispatchStatus.InProgress, record.Status);
+        Assert.Equal("payload", record.Payload);
     }
 
     /// <summary>
@@ -38,7 +46,7 @@ public class ChordFlowMessengerTests
         };
 
         var flow = new ChordFlowDefinition("Test", "1.0", steps);
-        var messenger = new ChordFlowMessenger(new FakeFlowProvider(flow), new FakePublisher());
+        var messenger = new ChordFlowMessenger(new FakeFlowProvider(flow), new FakePublisher(), new FakeStore());
 
         var exception = await Assert.ThrowsAsync<ChordConfigurationException>(() => messenger.StartAsync("payload").AsTask());
         Assert.Contains("at least two steps", exception.Message, StringComparison.OrdinalIgnoreCase);
@@ -80,6 +88,17 @@ public class ChordFlowMessengerTests
             QueueName = queueName;
             Payload = body;
             CorrelationId = correlationId;
+            return ValueTask.CompletedTask;
+        }
+    }
+
+    private sealed class FakeStore : IChordStore
+    {
+        public List<FlowDispatchRecord> Records { get; } = new();
+
+        public ValueTask RecordDispatchAsync(FlowDispatchRecord record, System.Threading.CancellationToken cancellationToken = default)
+        {
+            Records.Add(record);
             return ValueTask.CompletedTask;
         }
     }

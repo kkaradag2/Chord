@@ -1,0 +1,47 @@
+﻿workflow:
+  name: OrderProcessing
+  version: 1.0
+
+steps:
+  - id: orders
+    service: OrdersGateway
+    command:
+      event: OrderReceived
+      queue: orders.command
+    completion:
+      event: OrderAccepted
+      timeout: 5s
+
+  - id: payment
+    service: PaymentService
+    command:
+      event: PaymentRequested
+      queue: payment.command
+    completion:
+      event: PaymentCompleted
+      timeout: 10s
+    onFailure:
+      rollback:
+        - step: orders
+          command:
+            event: OrderRollbackRequested
+            queue: orders.command
+
+  - id: shipping
+    service: ShippingService
+    command:
+      event: ShippingRequested
+      queue: shipping.command
+    completion:
+      event: ShippingCompleted
+      timeout: 15s
+    onFailure:
+      rollback:
+        - step: payment
+          command:
+            event: PaymentRollbackRequested
+            queue: payment.command
+        - step: orders
+          command:
+            event: OrderRollbackRequested
+            queue: orders.command

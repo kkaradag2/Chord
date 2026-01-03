@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Chord.Core;
 using Chord.Core.Exceptions;
 using Chord.Core.Stores;
@@ -7,6 +8,7 @@ using Chord.Store.InMemory.Configuration;
 using Chord.Store.PostgreSql;
 using Chord.Store.PostgreSql.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Chord.Store.InMemory;
 
 namespace Chord.Test.Registrations;
 
@@ -114,5 +116,26 @@ public class StoreConfigurationTests
         });
 
         Assert.Contains("Only one store provider", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task InMemoryStore_PreservesDispatchRecord()
+    {
+        var store = new InMemoryChordStore();
+        var record = new FlowDispatchRecord(
+            "corr",
+            "payment",
+            "payment.command",
+            FlowDispatchStatus.InProgress,
+            DateTimeOffset.UtcNow,
+            null,
+            TimeSpan.Zero,
+            "{ }");
+
+        await store.RecordDispatchAsync(record);
+
+        Assert.True(store.Records.TryGetValue("corr", out var list));
+        Assert.Single(list!);
+        Assert.Equal(record, list![0]);
     }
 }

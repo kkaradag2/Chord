@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\\..\\src\\Chord.Core\\Chord.Core.csproj" />
+    <ProjectReference Include="..\\..\\src\\Chord.Messaging.RabitMQ\\Chord.Messaging.RabitMQ.csproj" />
   </ItemGroup>
 
 </Project>

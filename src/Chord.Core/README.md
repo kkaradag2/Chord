@@ -13,6 +13,18 @@ builder.Services.AddChord(config =>
     {
         flow.FromYamlFile("flow/order-flow.yaml");
     });
+
+    config.Messaging(m =>
+    {
+        m.RabbitMq(options =>
+        {
+            options.HostName = "localhost";
+            options.UserName = "guest";
+            options.Password = "guest";
+        });
+
+        m.BindFlow();
+    });
 });
 ```
 
@@ -87,3 +99,12 @@ steps:
 - **YAML syntax**: malformed YAML produces a readable error mentioning that the document contains invalid YAML.
 
 Refer to `test/SamplesYamls` for ready-made valid and invalid YAML examples that mirror the automated tests.
+
+## Messaging (RabbitMQ)
+
+Messaging support lives in the `Chord.Messaging.RabitMQ` package. Bringing the namespace into your host enables the `config.Messaging(...)` hook shown above. Rules enforced by the builder:
+
+- You must register exactly one messaging provider (RabbitMQ today, Kafka later). Attempting to register multiple providers throws a `ChordConfigurationException`.
+- `BindFlow()` is mandatory and ensures the messaging infrastructure is bound to your workflow.
+- The RabbitMQ provider exposes `IRabbitMqMessagePublisher` / `IChordMessagePublisher` so application services can publish messages to queues.
+- Hosts can trigger the initial external step by resolving `IChordFlowMessenger`, which publishes the provided payload to the queue defined by the second YAML step.

@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{0C88DD14-F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chord.Test.Registrations", "test\Chord.Test.Registrations\Chord.Test.Registrations.csproj", "{7BDFCF98-A80E-406B-87FA-A9C8BEC1B4C0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chord.Messaging.Kafka", "src\Chord.Messaging.Kafka\Chord.Messaging.Kafka.csproj", "{A9CEF6AA-1048-4887-AE66-50EE74423C85}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,18 @@ Global
 		{7BDFCF98-A80E-406B-87FA-A9C8BEC1B4C0}.Release|x64.Build.0 = Release|Any CPU
 		{7BDFCF98-A80E-406B-87FA-A9C8BEC1B4C0}.Release|x86.ActiveCfg = Release|Any CPU
 		{7BDFCF98-A80E-406B-87FA-A9C8BEC1B4C0}.Release|x86.Build.0 = Release|Any CPU
+		{A9CEF6AA-1048-4887-AE66-50EE74423C85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9CEF6AA-1048-4887-AE66-50EE74423C85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9CEF6AA-1048-4887-AE66-50EE74423C85}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A9CEF6AA-1048-4887-AE66-50EE74423C85}.Debug|x64.Build.0 = Debug|Any CPU
+		{A9CEF6AA-1048-4887-AE66-50EE74423C85}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A9CEF6AA-1048-4887-AE66-50EE74423C85}.Debug|x86.Build.0 = Debug|Any CPU
+		{A9CEF6AA-1048-4887-AE66-50EE74423C85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9CEF6AA-1048-4887-AE66-50EE74423C85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9CEF6AA-1048-4887-AE66-50EE74423C85}.Release|x64.ActiveCfg = Release|Any CPU
+		{A9CEF6AA-1048-4887-AE66-50EE74423C85}.Release|x64.Build.0 = Release|Any CPU
+		{A9CEF6AA-1048-4887-AE66-50EE74423C85}.Release|x86.ActiveCfg = Release|Any CPU
+		{A9CEF6AA-1048-4887-AE66-50EE74423C85}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,5 +111,6 @@ Global
 		{5CD59197-E546-4826-8B33-6E4FDFC97EB9} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{BE783409-A30D-41A0-83B8-AAFF954106AF} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{7BDFCF98-A80E-406B-87FA-A9C8BEC1B4C0} = {0C88DD14-F956-CE84-757C-A364CCF449FC}
+		{A9CEF6AA-1048-4887-AE66-50EE74423C85} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

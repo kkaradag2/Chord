@@ -1,6 +1,7 @@
 using System;
 using Chord.Core.Exceptions;
 using Chord.Core.Flows;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Chord.Core.Configuration;
 
@@ -9,7 +10,22 @@ namespace Chord.Core.Configuration;
 /// </summary>
 public sealed class ChordConfigurationBuilder
 {
+    private readonly IServiceCollection _services;
     private ChordFlowDefinition? _flowDefinition;
+
+    /// <summary>
+    /// Initializes the builder with the service collection so extensions can register components.
+    /// </summary>
+    /// <param name="services">Host service collection that Chord augments.</param>
+    public ChordConfigurationBuilder(IServiceCollection services)
+    {
+        _services = services ?? throw new ArgumentNullException(nameof(services));
+    }
+
+    /// <summary>
+    /// Gets the underlying service collection for advanced integrations.
+    /// </summary>
+    public IServiceCollection Services => _services;
 
     /// <summary>
     /// Configures the workflow definition that Chord should use.

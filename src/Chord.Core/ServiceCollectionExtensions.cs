@@ -23,7 +23,7 @@ public static class ServiceCollectionExtensions
             throw new ArgumentNullException(nameof(configure));
         }
 
-        var builder = new ChordConfigurationBuilder();
+        var builder = new ChordConfigurationBuilder(services);
         configure(builder);
         var flowDefinition = builder.Build();
 

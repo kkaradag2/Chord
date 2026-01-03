@@ -29,7 +29,9 @@ public static class StoreBuilderExtensions
         builder.UseProvider("PostgreSql", services =>
         {
             services.AddSingleton(options);
-            services.AddSingleton<IChordStore, PostgreSqlChordStore>();
+            services.AddSingleton<PostgreSqlChordStore>();
+            services.AddSingleton<IChordStore>(sp => sp.GetRequiredService<PostgreSqlChordStore>());
+            services.AddSingleton<IChordStoreSnapshotProvider>(sp => sp.GetRequiredService<PostgreSqlChordStore>());
         });
     }
 }

@@ -19,7 +19,9 @@ public static class StoreBuilderExtensions
 
         builder.UseProvider("InMemory", services =>
         {
-            services.AddSingleton<IChordStore, InMemoryChordStore>();
+            services.AddSingleton<InMemoryChordStore>();
+            services.AddSingleton<IChordStore>(sp => sp.GetRequiredService<InMemoryChordStore>());
+            services.AddSingleton<IChordStoreSnapshotProvider>(sp => sp.GetRequiredService<InMemoryChordStore>());
         });
     }
 }

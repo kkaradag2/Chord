@@ -1,5 +1,7 @@
 using Chord.Core.Configuration;
+using Chord.Core.Dashboard;
 using Chord.Core.Flows;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Chord.Core;
@@ -29,6 +31,7 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton(flowDefinition);
         services.AddSingleton<IChordFlowDefinitionProvider>(new ChordFlowDefinitionProvider(flowDefinition));
+        services.AddSingleton<IStartupFilter, ChordDashboardStartupFilter>();
 
         return services;
     }

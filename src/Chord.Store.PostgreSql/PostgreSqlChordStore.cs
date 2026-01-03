@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Chord.Core.Stores;
@@ -7,7 +8,7 @@ namespace Chord.Store.PostgreSql;
 /// <summary>
 /// Placeholder PostgreSQL store implementation.
 /// </summary>
-internal sealed class PostgreSqlChordStore : IChordStore
+internal sealed class PostgreSqlChordStore : IChordStore, IChordStoreSnapshotProvider
 {
     public PostgreSqlStoreOptions Options { get; }
 
@@ -26,5 +27,10 @@ internal sealed class PostgreSqlChordStore : IChordStore
     {
         // Implementation placeholder; actual persistence will be added in future work.
         return ValueTask.CompletedTask;
+    }
+
+    public IReadOnlyDictionary<string, IReadOnlyList<FlowDispatchRecord>> GetSnapshot()
+    {
+        return new Dictionary<string, IReadOnlyList<FlowDispatchRecord>>();
     }
 }

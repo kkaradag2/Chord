@@ -11,7 +11,7 @@ namespace Chord.Store.InMemory;
 /// <summary>
 /// In-memory implementation that keeps dispatch history for diagnostics/testing.
 /// </summary>
-internal sealed class InMemoryChordStore : IChordStore
+internal sealed class InMemoryChordStore : IChordStore, IChordStoreSnapshotProvider
 {
     private readonly ConcurrentDictionary<string, List<FlowDispatchRecord>> _records = new(StringComparer.OrdinalIgnoreCase);
 
@@ -59,20 +59,17 @@ internal sealed class InMemoryChordStore : IChordStore
     /// <summary>
     /// Exposes the recorded dispatches for test verification.
     /// </summary>
-    public IReadOnlyDictionary<string, IReadOnlyList<FlowDispatchRecord>> Records
+    public IReadOnlyDictionary<string, IReadOnlyList<FlowDispatchRecord>> GetSnapshot()
     {
-        get
+        var snapshot = new Dictionary<string, IReadOnlyList<FlowDispatchRecord>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var pair in _records)
         {
-            var snapshot = new Dictionary<string, IReadOnlyList<FlowDispatchRecord>>(StringComparer.OrdinalIgnoreCase);
-            foreach (var pair in _records)
+            lock (pair.Value)
             {
-                lock (pair.Value)
-                {
-                    snapshot[pair.Key] = pair.Value.ToArray();
-                }
+                snapshot[pair.Key] = pair.Value.ToArray();
             }
-
-            return snapshot;
         }
+
+        return snapshot;
     }
 }

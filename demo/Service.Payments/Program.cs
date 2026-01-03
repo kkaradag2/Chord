@@ -91,12 +91,12 @@ public sealed class PaymentQueueListener : BackgroundService
     {
         _channel!.QueueDeclare(queue: "orders.command", durable: true, exclusive: false, autoDelete: false);
 
+        using var payloadDocument = JsonDocument.Parse(originalPayload);
         var eventPayload = JsonSerializer.Serialize(new
         {
             stepId = "payment",
             status = string.Equals(eventName, "PaymentCompleted", StringComparison.OrdinalIgnoreCase) ? "Success" : "Failure",
-            eventName,
-            payload = JsonSerializer.Deserialize<JsonElement>(originalPayload)
+            payload = payloadDocument.RootElement
         });
 
         var properties = _channel!.CreateBasicProperties();

@@ -136,7 +136,8 @@ public class StoreConfigurationTests
         await store.RecordDispatchAsync(record);
         await store.UpdateDispatchAsync("corr", FlowDispatchStatus.Completed, """{"event":"PaymentCompleted"}""");
 
-        Assert.True(store.Records.TryGetValue("corr", out var list));
+        var snapshot = store.GetSnapshot();
+        Assert.True(snapshot.TryGetValue("corr", out var list));
         Assert.Single(list!);
         Assert.Equal(FlowDispatchStatus.Completed, list![0].Status);
         Assert.NotNull(list[0].CompletedAt);

@@ -1,0 +1,1 @@
+# Chord.Messaging.RabitMQ

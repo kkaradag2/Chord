@@ -30,7 +30,8 @@ internal sealed class ChordFlowMessenger : IChordFlowMessenger
         }
 
         var nextStep = flow.Steps[1];
-        return _publisher.PublishAsync(nextStep.Command.Queue, payload, cancellationToken);
+        var correlationId = CreateCorrelationId();
+        return _publisher.PublishAsync(nextStep.Command.Queue, payload, correlationId, cancellationToken);
     }
 
     public ValueTask StartAsync(string payload, CancellationToken cancellationToken = default)
@@ -38,4 +39,6 @@ internal sealed class ChordFlowMessenger : IChordFlowMessenger
         var data = Encoding.UTF8.GetBytes(payload ?? string.Empty);
         return StartAsync(data, cancellationToken);
     }
+
+    private static string CreateCorrelationId() => Guid.NewGuid().ToString("N");
 }

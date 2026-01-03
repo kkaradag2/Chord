@@ -23,6 +23,7 @@ public class ChordFlowMessengerTests
 
         Assert.Equal("payment.command", publisher.QueueName);
         Assert.Equal("payload", Encoding.UTF8.GetString(publisher.Payload.ToArray()));
+        Assert.False(string.IsNullOrWhiteSpace(publisher.CorrelationId));
     }
 
     /// <summary>
@@ -72,11 +73,13 @@ public class ChordFlowMessengerTests
     {
         public string? QueueName { get; private set; }
         public ReadOnlyMemory<byte> Payload { get; private set; }
+        public string? CorrelationId { get; private set; }
 
-        public ValueTask PublishAsync(string queueName, ReadOnlyMemory<byte> body, System.Threading.CancellationToken cancellationToken = default)
+        public ValueTask PublishAsync(string queueName, ReadOnlyMemory<byte> body, string? correlationId = null, System.Threading.CancellationToken cancellationToken = default)
         {
             QueueName = queueName;
             Payload = body;
+            CorrelationId = correlationId;
             return ValueTask.CompletedTask;
         }
     }

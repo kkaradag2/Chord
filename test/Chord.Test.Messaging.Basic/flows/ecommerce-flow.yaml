@@ -1,0 +1,70 @@
+﻿workflow:
+  name: EcommerceFlow
+  version: 1.0
+
+steps:
+  - id: checkout
+    service: CheckoutGateway
+    command:
+      event: CheckoutReceived
+      queue: checkout.command
+    completion:
+      event: CheckoutAcknowledged
+      timeout: 5s
+
+  - id: payment
+    service: PaymentService
+    command:
+      event: PaymentRequested
+      queue: payment.command
+    completion:
+      event: PaymentCompleted
+      timeout: 15s
+    onFailure:
+      rollback:
+        - step: checkout
+          command:
+            event: CheckoutRollbackRequested
+            queue: checkout.command
+
+  - id: inventory
+    service: InventoryService
+    command:
+      event: ReserveInventory
+      queue: inventory.command
+    completion:
+      event: InventoryReserved
+      timeout: 10s
+    onFailure:
+      rollback:
+        - step: payment
+          command:
+            event: PaymentRollbackRequested
+            queue: payment.command
+        - step: checkout
+          command:
+            event: CheckoutRollbackRequested
+            queue: checkout.command
+
+  - id: shipping
+    service: ShippingService
+    command:
+      event: ShippingRequested
+      queue: shipping.command
+    completion:
+      event: ShippingDispatched
+      timeout: 20s
+    onFailure:
+      rollback:
+        - step: inventory
+          command:
+            event: InventoryReleaseRequested
+            queue: inventory.command
+        - step: payment
+          command:
+            event: PaymentRollbackRequested
+            queue: payment.command
+        - step: checkout
+          command:
+            event: CheckoutRollbackRequested
+            queue: checkout.command

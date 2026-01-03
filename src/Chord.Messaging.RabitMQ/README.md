@@ -53,3 +53,5 @@ await messenger.StartAsync("""
 ```
 
 If the workflow contains fewer than two steps, or if `BindFlow()` is omitted, Chord throws `ChordConfigurationException` during startup to protect the pipeline configuration.
+
+Every flow invocation automatically tags the outgoing RabbitMQ message with a generated `x-correlation-id` header (also mirrored in `IBasicProperties.CorrelationId`) so downstream services can trace the execution chain.

@@ -10,7 +10,7 @@ namespace Chord.Messaging.RabitMQ.Messaging;
 public interface IChordMessagePublisher
 {
     /// <summary>
-    /// Publishes raw bytes to the given queue.
+    /// Publishes raw bytes to the given queue while allowing Chord to attach correlation metadata.
     /// </summary>
-    ValueTask PublishAsync(string queueName, ReadOnlyMemory<byte> body, CancellationToken cancellationToken = default);
+    ValueTask PublishAsync(string queueName, ReadOnlyMemory<byte> body, string? correlationId = null, CancellationToken cancellationToken = default);
 }

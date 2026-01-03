@@ -43,6 +43,11 @@ public sealed class RabbitMqOptions
     /// </summary>
     public bool UseTls { get; set; }
 
+    /// <summary>
+    /// Gets or sets the queue name from which completion events are consumed.
+    /// </summary>
+    public string CompletionQueueName { get; set; } = "orders.command";
+
     internal void Validate()
     {
         if (string.IsNullOrWhiteSpace(HostName))

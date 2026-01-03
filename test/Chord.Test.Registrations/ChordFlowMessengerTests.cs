@@ -32,6 +32,7 @@ public class ChordFlowMessengerTests
         Assert.Equal("payment.command", record.QueueName);
         Assert.Equal(FlowDispatchStatus.InProgress, record.Status);
         Assert.Equal("payload", record.Payload);
+        Assert.Null(record.CompletionPayload);
     }
 
     /// <summary>
@@ -99,6 +100,11 @@ public class ChordFlowMessengerTests
         public ValueTask RecordDispatchAsync(FlowDispatchRecord record, System.Threading.CancellationToken cancellationToken = default)
         {
             Records.Add(record);
+            return ValueTask.CompletedTask;
+        }
+
+        public ValueTask UpdateDispatchAsync(string correlationId, FlowDispatchStatus status, string payload, System.Threading.CancellationToken cancellationToken = default)
+        {
             return ValueTask.CompletedTask;
         }
     }

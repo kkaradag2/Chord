@@ -1,6 +1,7 @@
 using System;
 using Chord.Core.Exceptions;
 using Chord.Messaging.RabitMQ.Messaging;
+using Chord.Messaging.RabitMQ.Messaging.Completion;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -43,6 +44,7 @@ public sealed class MessagingBuilder
         _services.AddSingleton<RabbitMqMessagePublisher>();
         _services.AddSingleton<IRabbitMqMessagePublisher>(sp => sp.GetRequiredService<RabbitMqMessagePublisher>());
         _services.AddSingleton<IChordMessagePublisher>(sp => sp.GetRequiredService<RabbitMqMessagePublisher>());
+        _services.AddSingleton(options);
 
         _selectedProvider = MessagingProviderKind.RabbitMq;
         return this;
@@ -76,6 +78,8 @@ public sealed class MessagingBuilder
 
         EnsureProviderPresent();
         _services.AddSingleton<IChordFlowMessenger, ChordFlowMessenger>();
+        _services.AddSingleton<IFlowCompletionProcessor, FlowCompletionProcessor>();
+        _services.AddHostedService<FlowCompletionListener>();
         _bindInvoked = true;
     }
 

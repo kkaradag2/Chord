@@ -13,7 +13,8 @@ public sealed record FlowDispatchRecord(
     DateTimeOffset StartedAt,
     DateTimeOffset? CompletedAt,
     TimeSpan Duration,
-    string Payload);
+    string Payload,
+    string? CompletionPayload);
 
 /// <summary>
 /// Enumerates possible dispatch states.

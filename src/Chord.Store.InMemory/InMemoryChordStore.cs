@@ -26,6 +26,36 @@ internal sealed class InMemoryChordStore : IChordStore
         return ValueTask.CompletedTask;
     }
 
+    public ValueTask UpdateDispatchAsync(string correlationId, FlowDispatchStatus status, string payload, CancellationToken cancellationToken = default)
+    {
+        if (!_records.TryGetValue(correlationId, out var list))
+        {
+            return ValueTask.CompletedTask;
+        }
+
+        lock (list)
+        {
+            if (list.Count == 0)
+            {
+                return ValueTask.CompletedTask;
+            }
+
+            var lastIndex = list.Count - 1;
+            var existing = list[lastIndex];
+            var completedAt = DateTimeOffset.UtcNow;
+            var duration = completedAt - existing.StartedAt;
+            list[lastIndex] = existing with
+            {
+                Status = status,
+                CompletedAt = completedAt,
+                Duration = duration,
+                CompletionPayload = payload
+            };
+        }
+
+        return ValueTask.CompletedTask;
+    }
+
     /// <summary>
     /// Exposes the recorded dispatches for test verification.
     /// </summary>

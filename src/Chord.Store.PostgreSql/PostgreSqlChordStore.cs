@@ -21,4 +21,10 @@ internal sealed class PostgreSqlChordStore : IChordStore
         // Implementation placeholder; actual persistence will be added in future work.
         return ValueTask.CompletedTask;
     }
+
+    public ValueTask UpdateDispatchAsync(string correlationId, FlowDispatchStatus status, string payload, CancellationToken cancellationToken = default)
+    {
+        // Implementation placeholder; actual persistence will be added in future work.
+        return ValueTask.CompletedTask;
+    }
 }

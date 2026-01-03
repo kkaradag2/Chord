@@ -12,4 +12,9 @@ public interface IChordStore
     /// Records the dispatch of a workflow step.
     /// </summary>
     ValueTask RecordDispatchAsync(FlowDispatchRecord record, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates an existing dispatch with the result that arrived on a queue.
+    /// </summary>
+    ValueTask UpdateDispatchAsync(string correlationId, FlowDispatchStatus status, string payload, CancellationToken cancellationToken = default);
 }

@@ -44,7 +44,8 @@ internal sealed class ChordFlowMessenger : IChordFlowMessenger
             DateTimeOffset.UtcNow,
             null,
             TimeSpan.Zero,
-            payloadText);
+            payloadText,
+            null);
 
         return DispatchAsync(nextStep.Command.Queue, payload, correlationId, record, cancellationToken);
     }

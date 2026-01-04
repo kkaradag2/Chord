@@ -43,6 +43,11 @@ public static class ChordServiceCollectionExtensions
 
         services.TryAddSingleton(frozenOptions);
         services.TryAddSingleton<IOptions<ChordOptions>>(_ => new OptionsWrapper<ChordOptions>(frozenOptions));
+        services.TryAddSingleton(provider =>
+        {
+            var optionSnapshot = provider.GetRequiredService<IOptions<ChordOptions>>().Value;
+            return new ChordFlowRuntime(optionSnapshot.YamlFlows.Select(flow => flow.Flow));
+        });
 
         return services;
     }

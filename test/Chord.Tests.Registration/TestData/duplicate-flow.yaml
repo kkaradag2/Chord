@@ -1,0 +1,10 @@
+flow:
+  name: ValidFlow
+  version: "2.0"
+orchestrator:
+  completionQueue: completion-queue
+  failureQueue: failure-queue
+steps:
+  - id: duplicate-step
+    command:
+      queue: duplicate-queue

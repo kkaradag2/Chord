@@ -14,6 +14,7 @@ public sealed class ChordOptions
     private const string MessagingResourcePath = "(messaging)";
     private static readonly string[] AllowedExtensions = [".yaml", ".yml"];
     private readonly List<YamlFlowRegistration> _yamlFlows = new();
+    private readonly Dictionary<string, string> _flowNameRegistry = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<MessagingProviderRegistration> _messagingProviders = new();
     private IServiceCollection? _services;
 
@@ -25,7 +26,7 @@ public sealed class ChordOptions
     internal IReadOnlyCollection<MessagingProviderRegistration> MessagingProviders => _messagingProviders;
 
     /// <summary>
-    /// Registers one or more YAML files or directories that contain flow definitions.
+    /// Registers one or more YAML files that contain flow definitions.
     /// </summary>
     /// <param name="resourcePaths">Paths to YAML files or directories.</param>
     public ChordOptions UseYamlFlows(params string[] resourcePaths)
@@ -39,13 +40,13 @@ public sealed class ChordOptions
 
         foreach (var rawPath in resourcePaths)
         {
-            RegisterFlowPath(rawPath);
+            RegisterFlowFile(rawPath);
         }
 
         return this;
     }
 
-    private void RegisterFlowPath(string? rawPath)
+    private void RegisterFlowFile(string? rawPath)
     {
         if (string.IsNullOrWhiteSpace(rawPath))
         {
@@ -56,38 +57,10 @@ public sealed class ChordOptions
 
         if (Directory.Exists(fullPath))
         {
-            RegisterDirectory(fullPath);
-            return;
+            throw new ChordConfigurationException(fullPath, "Flow path must reference a YAML file, not a directory.");
         }
 
         RegisterFile(fullPath);
-    }
-
-    private void RegisterDirectory(string directoryPath)
-    {
-        string[] yamlFiles;
-
-        try
-        {
-            yamlFiles = Directory.EnumerateFiles(directoryPath, "*.*", SearchOption.TopDirectoryOnly)
-                .Where(HasYamlExtension)
-                .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
-                .ToArray();
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            throw new ChordConfigurationException(directoryPath, "Flow directory cannot be read.", ex);
-        }
-
-        if (yamlFiles.Length == 0)
-        {
-            throw new ChordConfigurationException(directoryPath, "Directory does not contain any YAML flow files.");
-        }
-
-        foreach (var file in yamlFiles)
-        {
-            RegisterFile(file);
-        }
     }
 
     private void RegisterFile(string filePath)
@@ -109,8 +82,8 @@ public sealed class ChordOptions
             throw new ChordConfigurationException(filePath, "Flow file cannot be read.", ex);
         }
 
-        ChordYamlSchemaValidator.Validate(filePath, contents);
-        AddValidatedFlow(filePath);
+        var manifest = ChordYamlSchemaValidator.Validate(filePath, contents);
+        AddValidatedFlow(filePath, manifest.FlowName);
     }
 
     /// <summary>
@@ -151,9 +124,15 @@ public sealed class ChordOptions
 
     internal IEnumerable<YamlFlowRegistration> RawYamlFlows => _yamlFlows;
 
-    internal void AddValidatedFlow(string resourcePath)
+    internal void AddValidatedFlow(string resourcePath, string flowName)
     {
-        _yamlFlows.Add(new YamlFlowRegistration(resourcePath));
+        if (_flowNameRegistry.TryGetValue(flowName, out var existingPath))
+        {
+            throw new ChordConfigurationException(resourcePath, $"Flow name '{flowName}' is already registered by '{existingPath}'.");
+        }
+
+        _flowNameRegistry[flowName] = resourcePath;
+        _yamlFlows.Add(new YamlFlowRegistration(resourcePath, flowName));
     }
 
     internal void AddMessagingProviderRegistration(string providerName)
@@ -175,7 +154,8 @@ public sealed class ChordOptions
     /// Represents a YAML flow file registration.
     /// </summary>
     /// <param name="ResourcePath">The path (relative or absolute) to the YAML file.</param>
-    public sealed record YamlFlowRegistration(string ResourcePath);
+    /// <param name="FlowName">The name declared in the flow definition.</param>
+    public sealed record YamlFlowRegistration(string ResourcePath, string FlowName);
 
     internal sealed record MessagingProviderRegistration(string ProviderName);
 }

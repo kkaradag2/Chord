@@ -7,12 +7,12 @@ namespace Chord;
 
 internal static class ChordYamlSchemaValidator
 {
-    public static void Validate(string resourcePath, string yamlContent)
+    public static FlowManifest Validate(string resourcePath, string yamlContent)
     {
         var root = Parse(resourcePath, yamlContent);
 
         var flowNode = RequireMapping(root, "flow", resourcePath, "Chord YAML document must declare 'flow' section.");
-        RequireScalar(flowNode, "name", resourcePath, "Chord YAML flow must declare 'name'.");
+        var flowName = RequireScalar(flowNode, "name", resourcePath, "Chord YAML flow must declare 'name'.");
         RequireScalar(flowNode, "version", resourcePath, "Chord YAML flow must declare 'version'.");
 
         var orchestratorNode = RequireMapping(root, "orchestrator", resourcePath, "Chord YAML document must declare 'orchestrator' section.");
@@ -31,6 +31,8 @@ internal static class ChordYamlSchemaValidator
             var commandNode = RequireMapping(stepMapping, "command", resourcePath, "Each step must declare a 'command' section.");
             RequireScalar(commandNode, "queue", resourcePath, "Each step command must declare 'queue'.");
         }
+
+        return new FlowManifest(flowName);
     }
 
     private static YamlMappingNode Parse(string resourcePath, string yamlContent)
@@ -120,4 +122,6 @@ internal static class ChordYamlSchemaValidator
         node = null!;
         return false;
     }
+
+    internal sealed record FlowManifest(string FlowName);
 }

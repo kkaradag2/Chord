@@ -64,6 +64,30 @@ public class ChordOptionsYamlValidationTests
 
         var registration = Assert.Single(options.YamlFlows);
         Assert.Equal(path, registration.ResourcePath);
+        Assert.Equal("ValidFlow", registration.FlowName);
+    }
+
+    [Fact]
+    public void UseYamlFlows_Throws_For_Directory()
+    {
+        var directoryPath = Path.GetFullPath(TestDataPath);
+        var options = new ChordOptions();
+
+        var ex = Assert.Throws<ChordConfigurationException>(() => options.UseYamlFlows(directoryPath));
+
+        Assert.Equal($"Chord configuration error for '{directoryPath}': Flow path must reference a YAML file, not a directory.", ex.Message);
+    }
+
+    [Fact]
+    public void UseYamlFlows_Throws_For_DuplicateFlowName()
+    {
+        var first = GetFullPath("valid-flow.yaml");
+        var duplicate = GetFullPath("duplicate-flow.yaml");
+        var options = new ChordOptions();
+
+        var ex = Assert.Throws<ChordConfigurationException>(() => options.UseYamlFlows(first, duplicate));
+
+        Assert.Equal($"Chord configuration error for '{duplicate}': Flow name 'ValidFlow' is already registered by '{first}'.", ex.Message);
     }
 
     private static string GetFullPath(string fileName)

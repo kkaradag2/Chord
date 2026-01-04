@@ -26,24 +26,7 @@ public sealed class RabbitMqMessageBus : IChordMessageBus, IDisposable
         ArgumentNullException.ThrowIfNull(logger);
 
         var cfg = options.Value;
-        _connectionFactory = new ConnectionFactory
-        {
-            HostName = cfg.HostName,
-            Port = cfg.Port,
-            UserName = cfg.UserName,
-            Password = cfg.Password,
-            VirtualHost = cfg.VirtualHost,
-            DispatchConsumersAsync = true
-        };
-
-        if (cfg.UseSsl)
-        {
-            _connectionFactory.Ssl = new SslOption
-            {
-                Enabled = true
-            };
-        }
-
+        _connectionFactory = RabbitMqConnectionFactoryBuilder.Build(cfg);
         _logger = logger;
     }
 

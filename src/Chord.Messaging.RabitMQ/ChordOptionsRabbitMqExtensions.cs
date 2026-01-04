@@ -17,6 +17,7 @@ public static class ChordOptionsRabbitMqExtensions
         configure(rabbitOptions);
 
         ValidateOptions(rabbitOptions);
+        AssertConnectivity(rabbitOptions);
 
         options.RegisterMessagingProvider(ProviderName, services =>
         {
@@ -67,6 +68,20 @@ public static class ChordOptionsRabbitMqExtensions
         if (string.IsNullOrWhiteSpace(options.VirtualHost))
         {
             throw new ChordConfigurationException(ProviderName, "RabbitMQ virtual host must be provided.");
+        }
+    }
+
+    private static void AssertConnectivity(RabbitMqOptions options)
+    {
+        try
+        {
+            var factory = RabbitMqConnectionFactoryBuilder.Build(options);
+            using var connection = factory.CreateConnection();
+            connection.Close();
+        }
+        catch (Exception ex)
+        {
+            throw new ChordConfigurationException(ProviderName, "The messaging service (RabbitMQ) is inaccessible.", ex);
         }
     }
 }

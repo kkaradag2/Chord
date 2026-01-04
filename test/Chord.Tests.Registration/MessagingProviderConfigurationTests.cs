@@ -51,6 +51,29 @@ public class MessagingProviderConfigurationTests
     }
 
     [Fact]
+    public void AddChord_WithInaccessibleRabbitMqServer_Throws()
+    {
+        var services = CreateServiceCollection();
+
+        var ex = Assert.Throws<ChordConfigurationException>(() =>
+        {
+            services.AddChord(options =>
+            {
+                options.UseRabbitMq(rabbit =>
+                {
+                    rabbit.HostName = "localhost2";
+                    rabbit.Port = 5672;
+                    rabbit.UserName = "guest";
+                    rabbit.Password = "guest";
+                    rabbit.VirtualHost = "/";
+                });
+            });
+        });
+
+        Assert.Equal("Chord configuration error for 'RabbitMQ': The messaging service (RabbitMQ) is inaccessible.", ex.Message);
+    }
+
+    [Fact]
     public void AddChord_WithValidKafkaConfiguration_RegistersPlaceholderBus()
     {
         var services = CreateServiceCollection();

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using YamlDotNet.Core;
 using YamlDotNet.RepresentationModel;
 
@@ -7,19 +8,20 @@ namespace Chord;
 
 internal static class ChordYamlSchemaValidator
 {
-    public static FlowManifest Validate(string resourcePath, string yamlContent)
+    public static FlowDefinition Validate(string resourcePath, string yamlContent)
     {
         var root = Parse(resourcePath, yamlContent);
 
         var flowNode = RequireMapping(root, "flow", resourcePath, "Chord YAML document must declare 'flow' section.");
         var flowName = RequireScalar(flowNode, "name", resourcePath, "Chord YAML flow must declare 'name'.");
-        RequireScalar(flowNode, "version", resourcePath, "Chord YAML flow must declare 'version'.");
+        var flowVersion = RequireScalar(flowNode, "version", resourcePath, "Chord YAML flow must declare 'version'.");
 
         var orchestratorNode = RequireMapping(root, "orchestrator", resourcePath, "Chord YAML document must declare 'orchestrator' section.");
-        RequireScalar(orchestratorNode, "completionQueue", resourcePath, "Chord YAML orchestrator must declare 'completionQueue'.");
-        RequireScalar(orchestratorNode, "failureQueue", resourcePath, "Chord YAML orchestrator must declare 'failureQueue'.");
+        var completionQueue = RequireScalar(orchestratorNode, "completionQueue", resourcePath, "Chord YAML orchestrator must declare 'completionQueue'.");
+        var failureQueue = RequireScalar(orchestratorNode, "failureQueue", resourcePath, "Chord YAML orchestrator must declare 'failureQueue'.");
 
         var stepsNode = RequireSequence(root, "steps", resourcePath, "Chord YAML document must declare 'steps' as a list.");
+        var steps = new System.Collections.Generic.List<FlowStep>();
         foreach (var stepNode in stepsNode)
         {
             if (stepNode is not YamlMappingNode stepMapping)
@@ -27,12 +29,13 @@ internal static class ChordYamlSchemaValidator
                 throw new ChordConfigurationException(resourcePath, "Each step must be a mapping node.");
             }
 
-            RequireScalar(stepMapping, "id", resourcePath, "Each step must declare 'id'.");
+            var stepId = RequireScalar(stepMapping, "id", resourcePath, "Each step must declare 'id'.");
             var commandNode = RequireMapping(stepMapping, "command", resourcePath, "Each step must declare a 'command' section.");
-            RequireScalar(commandNode, "queue", resourcePath, "Each step command must declare 'queue'.");
+            var queue = RequireScalar(commandNode, "queue", resourcePath, "Each step command must declare 'queue'.");
+            steps.Add(new FlowStep(stepId, queue));
         }
 
-        return new FlowManifest(flowName);
+        return new FlowDefinition(flowName, flowVersion, completionQueue, failureQueue, steps.ToArray());
     }
 
     private static YamlMappingNode Parse(string resourcePath, string yamlContent)
@@ -122,6 +125,4 @@ internal static class ChordYamlSchemaValidator
         node = null!;
         return false;
     }
-
-    internal sealed record FlowManifest(string FlowName);
 }

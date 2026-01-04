@@ -28,7 +28,7 @@ public sealed class ChordOptions
     /// <summary>
     /// Registers one or more YAML files that contain flow definitions.
     /// </summary>
-    /// <param name="resourcePaths">Paths to YAML files or directories.</param>
+    /// <param name="resourcePaths">Paths to YAML files.</param>
     public ChordOptions UseYamlFlows(params string[] resourcePaths)
     {
         ArgumentNullException.ThrowIfNull(resourcePaths);
@@ -82,8 +82,8 @@ public sealed class ChordOptions
             throw new ChordConfigurationException(filePath, "Flow file cannot be read.", ex);
         }
 
-        var manifest = ChordYamlSchemaValidator.Validate(filePath, contents);
-        AddValidatedFlow(filePath, manifest.FlowName);
+        var definition = ChordYamlSchemaValidator.Validate(filePath, contents);
+        AddValidatedFlow(filePath, definition);
     }
 
     /// <summary>
@@ -124,15 +124,22 @@ public sealed class ChordOptions
 
     internal IEnumerable<YamlFlowRegistration> RawYamlFlows => _yamlFlows;
 
-    internal void AddValidatedFlow(string resourcePath, string flowName)
+    internal void AddValidatedFlow(string resourcePath, FlowDefinition flow)
     {
+        var flowName = flow.Name;
         if (_flowNameRegistry.TryGetValue(flowName, out var existingPath))
         {
             throw new ChordConfigurationException(resourcePath, $"Flow name '{flowName}' is already registered by '{existingPath}'.");
         }
 
         _flowNameRegistry[flowName] = resourcePath;
-        _yamlFlows.Add(new YamlFlowRegistration(resourcePath, flowName));
+        _yamlFlows.Add(new YamlFlowRegistration(resourcePath, CloneFlowDefinition(flow)));
+    }
+
+    private static FlowDefinition CloneFlowDefinition(FlowDefinition flow)
+    {
+        var steps = flow.Steps.Select(step => new FlowStep(step.Id, step.CommandQueue)).ToArray();
+        return new FlowDefinition(flow.Name, flow.Version, flow.CompletionQueue, flow.FailureQueue, steps);
     }
 
     internal void AddMessagingProviderRegistration(string providerName)
@@ -154,8 +161,8 @@ public sealed class ChordOptions
     /// Represents a YAML flow file registration.
     /// </summary>
     /// <param name="ResourcePath">The path (relative or absolute) to the YAML file.</param>
-    /// <param name="FlowName">The name declared in the flow definition.</param>
-    public sealed record YamlFlowRegistration(string ResourcePath, string FlowName);
+    /// <param name="Flow">Materialized flow metadata that was parsed from the YAML.</param>
+    public sealed record YamlFlowRegistration(string ResourcePath, FlowDefinition Flow);
 
     internal sealed record MessagingProviderRegistration(string ProviderName);
 }

@@ -26,6 +26,6 @@ builder.Services.AddChord(options =>
 options.UseYamlFlows("flows/sample.yaml", "flows/billing.yaml");
 ```
 
-Each YAML file is parsed during startup and the `flow.name` declared inside must be unique across the application; duplicates trigger a `ChordConfigurationException` before any flows are executed.
+Each YAML file is parsed during startup and the `flow.name` declared inside must be unique across the application; duplicates trigger a `ChordConfigurationException` before any flows are executed. The parsed metadata (flow name, version, orchestrator queues, and step command queues) is cached in memory so downstream components can read it without reopening the original YAML files.
 
 Exactly one messaging provider must be selected (`UseRabbitMq` or `UseKafka`) so that Chord can fail-fast when host wiring is incomplete. Future messaging, storage and telemetry packages will extend `ChordOptions` with their own helpers to keep host wiring centralized.

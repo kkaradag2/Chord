@@ -64,7 +64,14 @@ public class ChordOptionsYamlValidationTests
 
         var registration = Assert.Single(options.YamlFlows);
         Assert.Equal(path, registration.ResourcePath);
-        Assert.Equal("ValidFlow", registration.FlowName);
+        var flow = registration.Flow;
+        Assert.Equal("ValidFlow", flow.Name);
+        Assert.Equal("1.0", flow.Version);
+        Assert.Equal("completion-queue", flow.CompletionQueue);
+        Assert.Equal("failure-queue", flow.FailureQueue);
+        var step = Assert.Single(flow.Steps);
+        Assert.Equal("reserve", step.Id);
+        Assert.Equal("reserve-queue", step.CommandQueue);
     }
 
     [Fact]

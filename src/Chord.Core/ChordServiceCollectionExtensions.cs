@@ -68,7 +68,7 @@ public static class ChordServiceCollectionExtensions
 
         foreach (var registration in source.RawYamlFlows)
         {
-            copy.AddValidatedFlow(registration.ResourcePath, registration.FlowName);
+            copy.AddValidatedFlow(registration.ResourcePath, registration.Flow);
         }
 
         foreach (var provider in source.MessagingProviders)

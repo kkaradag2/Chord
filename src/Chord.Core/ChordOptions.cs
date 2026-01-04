@@ -12,10 +12,12 @@ namespace Chord;
 public sealed class ChordOptions
 {
     private const string MessagingResourcePath = "(messaging)";
+    private const string StoreResourcePath = "(store)";
     private static readonly string[] AllowedExtensions = [".yaml", ".yml"];
     private readonly List<YamlFlowRegistration> _yamlFlows = new();
     private readonly Dictionary<string, string> _flowNameRegistry = new(StringComparer.OrdinalIgnoreCase);
     private readonly List<MessagingProviderRegistration> _messagingProviders = new();
+    private readonly List<StoreProviderRegistration> _storeProviders = new();
     private IServiceCollection? _services;
 
     /// <summary>
@@ -24,6 +26,7 @@ public sealed class ChordOptions
     public IReadOnlyCollection<YamlFlowRegistration> YamlFlows => _yamlFlows;
 
     internal IReadOnlyCollection<MessagingProviderRegistration> MessagingProviders => _messagingProviders;
+    internal IReadOnlyCollection<StoreProviderRegistration> StoreProviders => _storeProviders;
 
     /// <summary>
     /// Registers one or more YAML files that contain flow definitions.
@@ -42,6 +45,22 @@ public sealed class ChordOptions
         {
             RegisterFlowFile(rawPath);
         }
+
+        return this;
+    }
+
+    public ChordOptions RegisterStoreProvider(string providerName, Action<IServiceCollection> configureServices)
+    {
+        if (string.IsNullOrWhiteSpace(providerName))
+        {
+            throw new ChordConfigurationException(StoreResourcePath, "Store provider name cannot be null or whitespace.");
+        }
+
+        ArgumentNullException.ThrowIfNull(configureServices);
+        var services = _services ?? throw new InvalidOperationException("ChordOptions must be used inside IServiceCollection.AddChord to configure store providers.");
+
+        configureServices(services);
+        _storeProviders.Add(new StoreProviderRegistration(providerName));
 
         return this;
     }
@@ -147,6 +166,11 @@ public sealed class ChordOptions
         _messagingProviders.Add(new MessagingProviderRegistration(providerName));
     }
 
+    internal void AddStoreProviderRegistration(string providerName)
+    {
+        _storeProviders.Add(new StoreProviderRegistration(providerName));
+    }
+
     internal void BindServices(IServiceCollection services)
     {
         _services = services ?? throw new ArgumentNullException(nameof(services));
@@ -165,4 +189,6 @@ public sealed class ChordOptions
     public sealed record YamlFlowRegistration(string ResourcePath, FlowDefinition Flow);
 
     internal sealed record MessagingProviderRegistration(string ProviderName);
+
+    internal sealed record StoreProviderRegistration(string ProviderName);
 }

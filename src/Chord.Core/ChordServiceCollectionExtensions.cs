@@ -39,6 +39,7 @@ public static class ChordServiceCollectionExtensions
         }
 
         ValidateMessagingProviderSelection(options);
+        ValidateStoreProviderSelection(options);
 
         var frozenOptions = CloneOptions(options);
 
@@ -65,6 +66,21 @@ public static class ChordServiceCollectionExtensions
         }
     }
 
+    private static void ValidateStoreProviderSelection(ChordOptions options)
+    {
+        var count = options.StoreProviders.Count;
+        if (count == 0)
+        {
+            throw new ChordConfigurationException("(store)", "Exactly one store provider must be configured via UseInMemoryStore or UsePostgreSqlStore.");
+        }
+
+        if (count > 1)
+        {
+            var names = string.Join(", ", options.StoreProviders.Select(x => x.ProviderName));
+            throw new ChordConfigurationException("(store)", $"Exactly one store provider must be configured, but {count} were provided ({names}).");
+        }
+    }
+
     private static ChordOptions CloneOptions(ChordOptions source)
     {
         var copy = new ChordOptions();
@@ -77,6 +93,11 @@ public static class ChordServiceCollectionExtensions
         foreach (var provider in source.MessagingProviders)
         {
             copy.AddMessagingProviderRegistration(provider.ProviderName);
+        }
+
+        foreach (var store in source.StoreProviders)
+        {
+            copy.AddStoreProviderRegistration(store.ProviderName);
         }
 
         return copy;

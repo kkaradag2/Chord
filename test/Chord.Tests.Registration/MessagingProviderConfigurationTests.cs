@@ -23,6 +23,8 @@ public class MessagingProviderConfigurationTests
                 rabbit.Password = "guest";
                 rabbit.VirtualHost = "/";
             });
+
+            options.UseInMemoryStore();
         });
 
         using var provider = services.BuildServiceProvider();
@@ -44,6 +46,8 @@ public class MessagingProviderConfigurationTests
                 {
                     rabbit.Port = 0;
                 });
+
+                options.UseInMemoryStore();
             });
         });
 
@@ -67,6 +71,8 @@ public class MessagingProviderConfigurationTests
                     rabbit.Password = "guest";
                     rabbit.VirtualHost = "/";
                 });
+
+                options.UseInMemoryStore();
             });
         });
 
@@ -85,6 +91,8 @@ public class MessagingProviderConfigurationTests
                 kafka.BootstrapServers = "localhost:9092";
                 kafka.DefaultTopic = "orders";
             });
+
+            options.UseInMemoryStore();
         });
 
         using var provider = services.BuildServiceProvider();
@@ -116,6 +124,8 @@ public class MessagingProviderConfigurationTests
                     kafka.BootstrapServers = "localhost:9092";
                     kafka.DefaultTopic = "orders";
                 });
+
+                options.UseInMemoryStore();
             });
         });
 
@@ -129,7 +139,10 @@ public class MessagingProviderConfigurationTests
 
         var ex = Assert.Throws<ChordConfigurationException>(() =>
         {
-            services.AddChord(_ => { });
+            services.AddChord(options =>
+            {
+                options.UseInMemoryStore();
+            });
         });
 
         Assert.Equal("Chord configuration error for '(messaging)': Exactly one messaging provider must be configured via UseRabbitMq or UseKafka.", ex.Message);

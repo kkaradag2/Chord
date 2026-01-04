@@ -82,6 +82,7 @@ public class FlowOrchestrationTests
                     svc.AddSingleton<FakeChordMessageBus>();
                     svc.AddSingleton<IChordMessageBus>(sp => sp.GetRequiredService<FakeChordMessageBus>());
                 });
+                options.UseInMemoryStore();
             });
 
             var provider = services.BuildServiceProvider();

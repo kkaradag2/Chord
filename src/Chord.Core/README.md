@@ -16,7 +16,8 @@ builder.Services.AddChord(options =>
             rabbit.UserName = "guest";
             rabbit.Password = "guest";
             rabbit.VirtualHost = "/";
-        });
+        })
+        .UseInMemoryStore();
 });
 ```
 

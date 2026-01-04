@@ -1,0 +1,7 @@
+flow:
+  name: BrokenFlow
+  version: "1.0"
+steps:
+  - id: step-1
+    command:
+      queue: queue-1

@@ -1,0 +1,74 @@
+using System;
+using System.IO;
+using Chord;
+using Xunit;
+
+namespace Chord.Tests.Registration;
+
+public class ChordOptionsYamlValidationTests
+{
+    private static string TestDataPath => Path.Combine(AppContext.BaseDirectory, "TestData");
+
+    [Fact]
+    public void UseYamlFlows_Throws_For_NonYamlFile()
+    {
+        var path = GetFullPath("not-yaml.txt");
+        var options = new ChordOptions();
+
+        var ex = Assert.Throws<ChordConfigurationException>(() => options.UseYamlFlows(path));
+
+        Assert.Equal($"Chord configuration error for '{path}': Flow path must reference a .yaml or .yml file.", ex.Message);
+    }
+
+    [Fact]
+    public void UseYamlFlows_Throws_For_MissingFile()
+    {
+        var path = Path.Combine(TestDataPath, "missing-flow.yaml");
+        var fullPath = Path.GetFullPath(path);
+        var options = new ChordOptions();
+
+        var ex = Assert.Throws<ChordConfigurationException>(() => options.UseYamlFlows(fullPath));
+
+        Assert.Equal($"Chord configuration error for '{fullPath}': Flow file does not exist.", ex.Message);
+    }
+
+    [Fact]
+    public void UseYamlFlows_Throws_For_UnparsableYaml()
+    {
+        var path = GetFullPath("malformed.yaml");
+        var options = new ChordOptions();
+
+        var ex = Assert.Throws<ChordConfigurationException>(() => options.UseYamlFlows(path));
+
+        Assert.Equal($"Chord configuration error for '{path}': Flow file is not a valid YAML document.", ex.Message);
+    }
+
+    [Fact]
+    public void UseYamlFlows_Throws_For_InvalidChordSchema()
+    {
+        var path = GetFullPath("invalid-structure.yaml");
+        var options = new ChordOptions();
+
+        var ex = Assert.Throws<ChordConfigurationException>(() => options.UseYamlFlows(path));
+
+        Assert.Equal($"Chord configuration error for '{path}': Chord YAML document must declare 'orchestrator' section.", ex.Message);
+    }
+
+    [Fact]
+    public void UseYamlFlows_Registers_ValidYaml()
+    {
+        var path = GetFullPath("valid-flow.yaml");
+        var options = new ChordOptions();
+
+        options.UseYamlFlows(path);
+
+        var registration = Assert.Single(options.YamlFlows);
+        Assert.Equal(path, registration.ResourcePath);
+    }
+
+    private static string GetFullPath(string fileName)
+    {
+        var path = Path.Combine(TestDataPath, fileName);
+        return Path.GetFullPath(path);
+    }
+}

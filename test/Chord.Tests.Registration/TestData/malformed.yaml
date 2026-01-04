@@ -1,0 +1,13 @@
+flow:
+  name: SampleFlow
+  version: "1.0"
+orchestrator:
+  completionQueue: completion-queue
+  failureQueue: failure-queue
+steps:
+  - id: step-1
+    command:
+      queue: queue-1
+  - id: step-2
+    command
+      queue: queue-2

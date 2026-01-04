@@ -1,0 +1,16 @@
+flow:
+  name: ShipmentFlow
+  version: "1.0"
+orchestrator:
+  completionQueue: queue.shipment-completed
+  failureQueue: queue.shipment-failed
+steps:
+  - id: pack
+    command:
+      queue: queue.pack
+  - id: ship
+    command:
+      queue: queue.ship
+  - id: deliver
+    command:
+      queue: queue.deliver

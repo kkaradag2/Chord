@@ -1,0 +1,13 @@
+flow:
+  name: OrderFlow
+  version: "1.0"
+orchestrator:
+  completionQueue: queue.order-completed
+  failureQueue: queue.order-failed
+steps:
+  - id: reserve
+    command:
+      queue: queue.reserve
+  - id: capture
+    command:
+      queue: queue.capture

@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Chord;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 
 namespace Chord.Messaging.RabitMQ;
 
@@ -58,6 +60,46 @@ public sealed class RabbitMqMessageBus : IChordMessageBus, IDisposable
         return Task.CompletedTask;
     }
 
+    public Task SubscribeAsync(string queueName, Func<ChordMessage, Task> handler, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(queueName))
+        {
+            throw new ArgumentException("Queue name cannot be null or whitespace.", nameof(queueName));
+        }
+        ArgumentNullException.ThrowIfNull(handler);
+
+        var connection = _connectionFactory.CreateConnection();
+        var channel = connection.CreateModel();
+        var consumer = new AsyncEventingBasicConsumer(channel);
+        consumer.Received += async (sender, args) =>
+        {
+            var headers = ExtractHeaders(args.BasicProperties);
+            var body = args.Body.ToArray();
+            var message = new ChordMessage(queueName, body, headers);
+            await handler(message).ConfigureAwait(false);
+        };
+
+        var consumerTag = channel.BasicConsume(queue: queueName, autoAck: true, consumer: consumer);
+        cancellationToken.Register(() =>
+        {
+            try
+            {
+                channel.BasicCancel(consumerTag);
+                channel.Close();
+            }
+            catch
+            {
+            }
+            finally
+            {
+                channel.Dispose();
+                connection.Dispose();
+            }
+        });
+
+        return Task.CompletedTask;
+    }
+
     private IModel EnsureChannel()
     {
         if (_channel is { IsOpen: true })
@@ -102,5 +144,39 @@ public sealed class RabbitMqMessageBus : IChordMessageBus, IDisposable
     public void Dispose()
     {
         DisposeChannel();
+    }
+
+    private static IReadOnlyDictionary<string, string> ExtractHeaders(IBasicProperties properties)
+    {
+        var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        if (properties.Headers is not null)
+        {
+            foreach (var entry in properties.Headers)
+            {
+                if (entry.Value is byte[] bytes)
+                {
+                    headers[entry.Key] = Encoding.UTF8.GetString(bytes);
+                }
+                else if (entry.Value is ReadOnlyMemory<byte> memory)
+                {
+                    headers[entry.Key] = Encoding.UTF8.GetString(memory.ToArray());
+                }
+                else if (entry.Value is string s)
+                {
+                    headers[entry.Key] = s;
+                }
+                else if (entry.Value is null)
+                {
+                    headers[entry.Key] = string.Empty;
+                }
+                else
+                {
+                    headers[entry.Key] = entry.Value.ToString() ?? string.Empty;
+                }
+            }
+        }
+
+        return headers;
     }
 }

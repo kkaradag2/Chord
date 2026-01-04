@@ -29,3 +29,25 @@ options.UseYamlFlows("flows/sample.yaml", "flows/billing.yaml");
 Each YAML file is parsed during startup and the `flow.name` declared inside must be unique across the application; duplicates trigger a `ChordConfigurationException` before any flows are executed. The parsed metadata (flow name, version, orchestrator queues, and step command queues) is cached in memory so downstream components can read it without reopening the original YAML files.
 
 Exactly one messaging provider must be selected (`UseRabbitMq` or `UseKafka`) so that Chord can fail-fast when host wiring is incomplete. Future messaging, storage and telemetry packages will extend `ChordOptions` with their own helpers to keep host wiring centralized.
+
+## Starting flows
+
+The runtime is exposed via `ChordFlowRuntime`. Inject it into your application service and call `StartFlowAsync` with the flow name declared in YAML:
+
+```csharp
+public sealed class OrderController : ControllerBase
+{
+    private readonly ChordFlowRuntime _runtime;
+
+    public OrderController(ChordFlowRuntime runtime) => _runtime = runtime;
+
+    [HttpPost("orders")]
+    public async Task<IActionResult> CreateOrder(OrderPayload payload)
+    {
+        await _runtime.StartFlowAsync("OrderFlow", payload);
+        return Accepted();
+    }
+}
+```
+
+The runtime caches flow metadata from `UseYamlFlows`, dispatches the first step, listens to the orchestrator completion queue, and routes payloads through the remaining steps until the flow reaches `Completed`.

@@ -24,4 +24,10 @@ public sealed class KafkaMessageBus : IChordMessageBus
         _logger.LogWarning("Kafka message bus has not been implemented yet. Attempted to send to {QueueName}.", queueName);
         throw new NotSupportedException("Kafka message bus is not implemented yet.");
     }
+
+    public Task SubscribeAsync(string queueName, Func<ChordMessage, Task> handler, CancellationToken cancellationToken)
+    {
+        _logger.LogWarning("Kafka message bus subscription requested for {QueueName}, but Kafka integration is not implemented.", queueName);
+        throw new NotSupportedException("Kafka message bus is not implemented yet.");
+    }
 }

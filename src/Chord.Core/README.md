@@ -2,7 +2,7 @@
 
 ## Registering the core services
 
-Chord is activated inside a host application by extending the service collection:
+Chord is activated inside a host application by extending the service collection (assuming the host references `Chord.Core`, `Chord.Messaging.RabbitMQ`, and the desired store package such as `Chord.Store.InMemory`):
 
 ```csharp
 builder.Services.AddChord(options =>
@@ -52,3 +52,13 @@ public sealed class OrderController : ControllerBase
 ```
 
 The runtime caches flow metadata from `UseYamlFlows`, dispatches the first step, listens to the orchestrator completion queue, and routes payloads through the remaining steps until the flow reaches `Completed`.
+
+## Flow state tracking
+
+Each invocation of `StartFlowAsync` creates a flow instance entry through the configured `IChordStore`. The store records the flow name, correlation id, current status, and timestamps for `startedAt`/`completedAt` including the total duration (in milliseconds). When a step is dispatched the runtime immediately creates a step instance row, capturing the `stepId`, associated flow instance id, status, and timestamps. Upon receiving the completion event the runtime marks the step (and eventually the flow) as `Completed`, filling the completion timestamps and duration. Chord.Core never talks to a physical database directly; it reaches the configured store implementation via the `IChordStore` abstraction so providers such as PostgreSQL or in-memory stores can keep the orchestration state in sync.
+
+The runtime also captures outbound and inbound orchestration traffic through the `chord_message_logs` table (or in-memory equivalent). Every publish call records the destination queue, headers, and timestamps, and every completion message that flows through the orchestrator listener is persisted with its correlation metadata. Providers can expose these logs for auditing, troubleshooting, or replay capabilities without re-reading YAML files.
+
+## Choosing a store
+
+Chord requires exactly one state store. For development or unit testing reference `Chord.Store.InMemory` and call `UseInMemoryStore()`. For production-grade persistence install `Chord.Store.PostgreSql`, reference `Chord.Store.PostgreSql` from your host, and configure it through `UsePostgreSqlStore(opts => { ... })`. The PostgreSQL option validates connection details and automatically applies the embedded schema scripts during `AddChord`, ensuring tables are created without EF Core migrations.

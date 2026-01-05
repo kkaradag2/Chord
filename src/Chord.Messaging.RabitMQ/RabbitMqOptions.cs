@@ -16,4 +16,10 @@ public sealed class RabbitMqOptions
     public string VirtualHost { get; set; } = "/";
 
     public bool UseSsl { get; set; }
+
+    /// <summary>
+    /// Primarily intended for integration tests where a fake bus overrides RabbitMQ;
+    /// when true, the connectivity probe is skipped.
+    /// </summary>
+    public bool SkipConnectivityCheck { get; set; }
 }

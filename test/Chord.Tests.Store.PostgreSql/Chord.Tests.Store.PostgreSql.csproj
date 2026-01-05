@@ -19,11 +19,13 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="Npgsql" Version="8.0.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Chord.Core\Chord.Core.csproj" />
-    <ProjectReference Include="..\..\src\Chord.Store.InMemory\Chord.Store.InMemory.csproj" />
+    <ProjectReference Include="..\..\src\Chord.Messaging.RabitMQ\Chord.Messaging.RabitMQ.csproj" />
+    <ProjectReference Include="..\..\src\Chord.Store.PostgreSql\Chord.Store.PostgreSql.csproj" />
   </ItemGroup>
 
   <ItemGroup>

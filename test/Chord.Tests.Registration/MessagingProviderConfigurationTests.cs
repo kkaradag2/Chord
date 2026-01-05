@@ -1,6 +1,7 @@
 using Chord;
 using Chord.Messaging.Kafka;
 using Chord.Messaging.RabitMQ;
+using Chord.Store.InMemory;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 

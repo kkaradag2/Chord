@@ -1,0 +1,16 @@
+flow:
+  name: InMemoryFlow
+  version: "1.0"
+orchestrator:
+  completionQueue: queue.memory-completed
+  failureQueue: queue.memory-failed
+steps:
+  - id: validate
+    command:
+      queue: queue.validate
+  - id: charge
+    command:
+      queue: queue.charge
+  - id: notify
+    command:
+      queue: queue.notify

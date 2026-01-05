@@ -17,7 +17,10 @@ public static class ChordOptionsRabbitMqExtensions
         configure(rabbitOptions);
 
         ValidateOptions(rabbitOptions);
-        AssertConnectivity(rabbitOptions);
+        if (!rabbitOptions.SkipConnectivityCheck)
+        {
+            AssertConnectivity(rabbitOptions);
+        }
 
         options.RegisterMessagingProvider(ProviderName, services =>
         {
@@ -39,7 +42,8 @@ public static class ChordOptionsRabbitMqExtensions
             UserName = source.UserName,
             Password = source.Password,
             VirtualHost = source.VirtualHost,
-            UseSsl = source.UseSsl
+            UseSsl = source.UseSsl,
+            SkipConnectivityCheck = source.SkipConnectivityCheck
         };
     }
 

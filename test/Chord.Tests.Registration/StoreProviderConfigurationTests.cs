@@ -1,5 +1,6 @@
 using Chord;
 using Chord.Messaging.Kafka;
+using Chord.Store.InMemory;
 using Chord.Store.PostgreSql;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;

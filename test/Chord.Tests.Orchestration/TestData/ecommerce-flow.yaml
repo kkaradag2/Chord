@@ -1,0 +1,19 @@
+flow:
+  name: EcommerceFlow
+  version: "1.0"
+orchestrator:
+  completionQueue: queue.ecommerce-completed
+  failureQueue: queue.ecommerce-failed
+steps:
+  - id: validate-payment
+    command:
+      queue: queue.validate-payment
+  - id: reserve-inventory
+    command:
+      queue: queue.reserve-inventory
+  - id: ship-order
+    command:
+      queue: queue.ship-order
+  - id: notify-customer
+    command:
+      queue: queue.notify-customer

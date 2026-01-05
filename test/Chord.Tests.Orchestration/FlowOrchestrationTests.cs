@@ -1,5 +1,7 @@
+using System.Linq;
 using System.Text.Json;
 using Chord;
+using Chord.Store.InMemory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Xunit;
@@ -32,6 +34,47 @@ public class FlowOrchestrationTests
         await bus.EmitCompletionAsync("queue.order-completed", correlationId, "capture", new { orderId = 42 });
 
         Assert.Equal(0, runtime.ActiveFlowCount);
+    }
+
+    [Fact]
+    public async Task EcommerceFlow_PersistsFlowAndStepInstances()
+    {
+        var flowPath = Path.Combine(TestDataPath, "ecommerce-flow.yaml");
+        await using var environment = await FlowTestEnvironment.CreateAsync(flowPath);
+        var runtime = environment.ServiceProvider.GetRequiredService<ChordFlowRuntime>();
+        var bus = environment.ServiceProvider.GetRequiredService<FakeChordMessageBus>();
+        var store = environment.ServiceProvider.GetRequiredService<IChordStore>();
+
+        await runtime.StartFlowAsync("EcommerceFlow", new { orderId = 9001, tenantId = "store-42" });
+
+        var firstDispatch = bus.PublishedMessages.First(m => m.QueueName == "queue.validate-payment");
+        var correlationId = firstDispatch.Headers[ChordMessageHeaders.CorrelationId];
+
+        await bus.EmitCompletionAsync("queue.ecommerce-completed", correlationId, "validate-payment", new { orderId = 9001 });
+        await bus.EmitCompletionAsync("queue.ecommerce-completed", correlationId, "reserve-inventory", new { orderId = 9001 });
+        await bus.EmitCompletionAsync("queue.ecommerce-completed", correlationId, "ship-order", new { orderId = 9001 });
+        await bus.EmitCompletionAsync("queue.ecommerce-completed", correlationId, "notify-customer", new { orderId = 9001 });
+
+        Assert.Equal(0, runtime.ActiveFlowCount);
+
+        var flows = await store.QueryFlowInstancesAsync();
+        var flow = Assert.Single(flows);
+        Assert.Equal("EcommerceFlow", flow.FlowName);
+        Assert.Equal(correlationId, flow.CorrelationId);
+        Assert.Equal(FlowInstanceStatus.Completed, flow.Status);
+        Assert.NotNull(flow.CompletedAtUtc);
+        Assert.True(flow.DurationMilliseconds is >= 0);
+
+        var steps = await store.QueryStepInstancesAsync(flow.Id);
+        Assert.Equal(new[] { "validate-payment", "reserve-inventory", "ship-order", "notify-customer" }, steps.Select(s => s.StepId));
+
+        foreach (var step in steps)
+        {
+            Assert.Equal(flow.Id, step.FlowInstanceId);
+            Assert.Equal(StepInstanceStatus.Completed, step.Status);
+            Assert.NotNull(step.CompletedAtUtc);
+            Assert.True(step.DurationMilliseconds is >= 0);
+        }
     }
 
     [Fact]

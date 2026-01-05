@@ -26,6 +26,7 @@
     <ProjectReference Include="..\..\src\Chord.Core\Chord.Core.csproj" />
     <ProjectReference Include="..\..\src\Chord.Messaging.Kafka\Chord.Messaging.Kafka.csproj" />
     <ProjectReference Include="..\..\src\Chord.Messaging.RabitMQ\Chord.Messaging.RabitMQ.csproj" />
+    <ProjectReference Include="..\..\src\Chord.Store.InMemory\Chord.Store.InMemory.csproj" />
     <ProjectReference Include="..\..\src\Chord.Store.PostgreSql\Chord.Store.PostgreSql.csproj" />
   </ItemGroup>
 

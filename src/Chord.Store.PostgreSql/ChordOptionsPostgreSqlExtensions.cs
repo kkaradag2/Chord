@@ -16,6 +16,7 @@ public static class ChordOptionsPostgreSqlExtensions
         var storeOptions = new PostgreSqlChordStoreOptions();
         configure(storeOptions);
         ValidatePostgreSqlOptions(storeOptions);
+        new PostgreSqlSchemaMigrator(storeOptions).EnsureSchema();
 
         return options.RegisterStoreProvider(ProviderName, services =>
         {

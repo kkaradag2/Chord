@@ -52,3 +52,7 @@ public sealed class OrderController : ControllerBase
 ```
 
 The runtime caches flow metadata from `UseYamlFlows`, dispatches the first step, listens to the orchestrator completion queue, and routes payloads through the remaining steps until the flow reaches `Completed`.
+
+## Choosing a store
+
+Chord requires exactly one state store. For development or unit testing call `UseInMemoryStore()`. For production-grade persistence install `Chord.Store.PostgreSql`, reference `Chord.Store.PostgreSql` from your host, and configure it through `UsePostgreSqlStore(opts => { ... })`. The PostgreSQL option validates connection details and automatically applies the embedded schema scripts during `AddChord`, ensuring tables are created without EF Core migrations.

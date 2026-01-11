@@ -62,7 +62,20 @@ On the other hand, the **Saga Choreography** approach does not rely on centraliz
 
 Therefore, it is evident that neither approach alone is universally suitable for all scenarios. In practical systems, factors such as performance, observability, fault tolerance, operational complexity, and cost must be carefully evaluated when selecting an appropriate Saga implementation strategy. The limited number of hybrid approaches in the literature and the insufficient exploration of real-world application scenarios form the primary motivation for considering Saga Orchestration and Saga Choreography as complementary or alternative models.
 
-While several studies compare Saga Orchestration and Saga Choreography, research proposing a hybrid model that combines the strengths of both while mitigating their weaknesses remains scarce. [5][6]
+While several studies compare Saga Orchestration and Saga Choreography, research proposing a hybrid model that combines the strengths of both while mitigating their weaknesses remains scarce. 
 
-Moreover, comprehensive qualitative and quantitative analyses examining the impact of Saga patterns on developer experience, debugging effort, operational complexity, and management cost are still limited. [7]
-```
+Moreover, comprehensive qualitative and quantitative analyses examining the impact of Saga patterns on developer experience, debugging effort, operational complexity, and management cost are still limited.
+
+## Conceptual Explanation of the Chord Approach
+
+The core idea behind **Chord** is to avoid managing the entire transaction flow through a single, centralized orchestrator. Instead, each domain microservice hosts a lightweight orchestration component internally.
+
+In this way, services do not rely on long event chains to trigger one another directly, while observability is preserved since control over the process is not fully dispersed.
+
+In the Chord approach, the domain microservice that initiates the workflow is equipped with Chord. After completing its own business logic, this service triggers the workflow through Chord and performs no further orchestration-related actions. From this point onward, Chord follows the workflow defined in its YAML configuration and dispatches commands to the next service via the message bus.
+
+The receiving service does **not** need to reference or include the Chord library. Once it completes its operation successfully, it sends a message to the **Chord Success queue**, allowing Chord to proceed to the next step in the workflow. If the service fails to complete its operation, it sends a message to the **Chord Fail queue**, upon which Chord sequentially initiates the defined compensation actions.
+
+Chord can also trigger compensation workflows by monitoring timeouts of the services it invokes. In addition, by tracking the health status of services, Chord can notify the domain service (host) to avoid triggering the workflow chain. Depending on configuration, Chord may also actively prevent the workflow from being started.
+
+![Chord](assets/Proposed_solution_1.png)

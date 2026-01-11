@@ -4,7 +4,8 @@ Chord is a lightweight flow definition and runtime model that enables determinis
 ## Problem Definition
 The Saga pattern is one of the most common approaches used to maintain data consistency in distributed transactions within microservice architectures. The Saga pattern is typically implemented in two ways.
 
-[!Saga_types.png]
+![The Saga pattern is typically implemented in two ways](assets/Saga_types.png)
+
 
 ## Orchestrated Saga 
 increases visibility and simplifies the management of workflow steps, errors, and compensation by using a central component to control the process. However, the central structure may create a Single Point of Failure (SPOF) and carries the risk of performance bottlenecks under high traffic.

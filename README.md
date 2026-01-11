@@ -79,3 +79,25 @@ The receiving service does **not** need to reference or include the Chord librar
 Chord can also trigger compensation workflows by monitoring timeouts of the services it invokes. In addition, by tracking the health status of services, Chord can notify the domain service (host) to avoid triggering the workflow chain. Depending on configuration, Chord may also actively prevent the workflow from being started.
 
 ![Chord](assets/Proposed_solution_1.png)
+
+### Saga Orchestration – Choreography – Chord Comparison Table
+
+| Criteria | Orchestration | Choreography | **Chord** |
+|--------|---------------|--------------|-----------|
+| **Control Model** | Managed by a central orchestrator | Services trigger each other by emitting events | Services that require it host a **local orchestrator** |
+| **Coupling** | Strong dependency on the central orchestrator | High event-based coupling between services | Loosely coupled services with controlled flow |
+| **Observability & Debugging** | Easy (single centralized logging point) | Difficult (event chains are distributed) | Easy to moderate (each service logs, flow is traceable) |
+| **Error Handling** | Centralized rollback, easy to manage | Rollback is difficult and complex | Local orchestration executes compensation scenarios |
+| **Scalability** | Central orchestrator may become a bottleneck | Very high scalability | High scalability due to distributed orchestration |
+| **Performance** | Additional orchestrator overhead | Fast event routing | Efficient; avoids central bottlenecks |
+| **SPOF Risk** | High (orchestrator failure halts the system) | None (fully distributed) | None (multiple small orchestrators) |
+| **Complexity** | Increases as orchestrator grows | Grows exponentially with event count | Modular, service-level control |
+| **Operational Management** | Visible but with centralized operational load | Difficult to monitor and manage | Balanced observability with distributed reliability |
+| **Flexibility** | Flow changes are made at the orchestrator | Event routing changes are costly | YAML-defined dynamic flows |
+| **Use Cases** | Critical transactional workflows | Event-driven domain processes | Hybrid scenarios, adaptive workflows |
+| **Overall Evaluation** | Strong control but highly centralized | Lightweight and flexible but hard to manage | **Hybrid approach combining strengths of both models** |
+
+
+The comparison of Saga Orchestration, Saga Choreography, and the Chord approach highlights that each model addresses different system requirements with distinct strengths and limitations. Saga Orchestration provides strong centralized control, making it particularly suitable for critical and sequential transactional workflows where observability, debugging, and centralized rollback management are essential. However, this centralized design introduces a single point of failure, increases the risk of performance bottlenecks under high load, and may lead to higher operational and resource costs. In contrast, Saga Choreography eliminates centralized coordination by allowing services to progress through event-based interactions, resulting in high scalability, loose coupling, and lower communication overhead. Nevertheless, as the number of services grows, event chains become harder to manage, system observability decreases, and the risk of cyclic dependencies increases, making debugging and operational control more challenging.
+
+The Chord approach positions itself as a hybrid solution between these two extremes. By embedding a lightweight orchestration component only within domain services that require flow control, Chord avoids the drawbacks of a single centralized orchestrator while preserving a sufficient level of observability. Workflow execution is distributed, improving scalability and fault tolerance, yet remains manageable through YAML-defined flows that clearly describe process steps and transitions. As a result, Chord combines the strong control and error-handling capabilities of orchestration with the performance and distribution benefits of choreography, offering a balanced and practical alternative for real-world microservice-based systems.

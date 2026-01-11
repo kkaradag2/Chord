@@ -10,6 +10,8 @@ The Saga pattern is one of the most common approaches used to maintain data cons
 ## Orchestrated Saga 
 increases visibility and simplifies the management of workflow steps, errors, and compensation by using a central component to control the process. However, the central structure may create a Single Point of Failure (SPOF) and carries the risk of performance bottlenecks under high traffic.
 
+![Orchestrated Saga ](assets/Orchestration_based_approach.png)
+
 ### Advantages of Orchestrated Saga 
 
 The main advantages of the Saga Orchestration model are as follows:
@@ -44,10 +46,23 @@ Choreographed Saga, on the other hand, is a decentralized model in which service
 - **Complexity:** As the number of services and process steps increases, managing the overall workflow becomes challenging. Developers may need to understand the application as a whole, similar to monolithic architectures.
 - **Cyclic Dependencies:** When services emit events in a chained manner, an incorrect design can lead to cyclic triggering. In such cases, the system may repeatedly trigger itself, effectively spamming its own event flow.
 
-[cyclic_dependency.png]
+![Cyclic Dependencies](assets/cyclic_dependency.png)
 
 - **Difficulty in Updates and Changes:** In systems where microservices are frequently added or removed, modifying the workflow requires code changes across multiple services. This significantly increases delivery times.
 - **Integration Testing Challenges:** Since all involved services must be running to simulate a complete process, preparing and executing integration tests becomes more difficult.
 
 
+## Why Is an Alternative to Saga Orchestration and Saga Choreography Needed?
 
+Although the Saga pattern is the most widely adopted solution for distributed transaction management in microservice architectures, the two existing approaches exhibit distinct advantages and disadvantages, making architectural decision-making challenging.
+
+The **Saga Orchestration** model provides centralized coordination, which simplifies the control, observability, and error handling of complex business workflows. However, this centralized structure also introduces a **Single Point of Failure**, carries the risk of becoming a bottleneck under high load, and— as demonstrated in the literature— may result in higher CPU and RAM consumption.
+
+On the other hand, the **Saga Choreography** approach does not rely on centralized control, enabling high scalability, loose coupling, lower communication overhead, and improved performance. Nevertheless, the independent, event-driven progression of services makes system observability and debugging more difficult. As the number of services increases, workflow complexity grows, and poorly designed event flows may lead to **cyclic dependencies**, increasing the risk of uncontrolled event loops.
+
+Therefore, it is evident that neither approach alone is universally suitable for all scenarios. In practical systems, factors such as performance, observability, fault tolerance, operational complexity, and cost must be carefully evaluated when selecting an appropriate Saga implementation strategy. The limited number of hybrid approaches in the literature and the insufficient exploration of real-world application scenarios form the primary motivation for considering Saga Orchestration and Saga Choreography as complementary or alternative models.
+
+While several studies compare Saga Orchestration and Saga Choreography, research proposing a hybrid model that combines the strengths of both while mitigating their weaknesses remains scarce. [5][6]
+
+Moreover, comprehensive qualitative and quantitative analyses examining the impact of Saga patterns on developer experience, debugging effort, operational complexity, and management cost are still limited. [7]
+```
